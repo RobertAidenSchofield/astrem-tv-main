@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/img/logo-banner.png" alt="nodecast-tv" height="60" />
+  <img src="public/img/logo-banner.png" alt="astrem" height="60" />
 </p>
 
 # What is astrem?
@@ -12,7 +12,7 @@ astrem is a modern, web-based IPTV player featuring Live TV, EPG, Movies (VOD), 
 - **📅 TV Guide (EPG)**: Interactive grid guide with 24h timeline, search, and dynamic resizing.
 - **🎬 VOD Support**: Dedicated sections for Movies and TV Series with rich metadata, posters, and seasonal episode lists.
 - **❤️ Favorites System**: Unified favorites for channels, movies, and series with instant synchronization.
-- **🔐 Authentication**: User login system with admin and viewer roles ([details](https://github.com/technomancer702/nodecast-tv/pull/23)).
+- **🔐 Authentication**: User login system with admin and viewer roles.
 - **🆔 OIDC SSO**: Support for Single Sign-On via OIDC providers (Authentik, Keycloak, etc.).
 - **⚡ High Performance**: Optimized for large playlists (7000+ channels) using virtual scrolling and batch rendering.
 - **⚙️ Management**:
@@ -47,7 +47,7 @@ astrem is a modern, web-based IPTV player featuring Live TV, EPG, Movies (VOD), 
 1.  Clone the repository:
 
     ```bash
-    git clone https://github.com/technomancer702/nodecast-tv.git
+    git clone https://github.com/RobertAidenSchofield/astrem-tv-main.git astrem
     cd astrem
     ```
 
@@ -74,7 +74,8 @@ You can run astrem easily using Docker.
     ```yaml
     services:
       astrem:
-        build: https://github.com/technomancer702/nodecast-tv.git#main
+        image: ghcr.io/robertaidenschofield/astrem-tv-main:latest
+        build: https://github.com/RobertAidenSchofield/astrem-tv-main.git#main
         container_name: astrem
         ports:
           - '3000:3000' # Host:Container
@@ -129,7 +130,7 @@ After restarting the container, go to **Settings -> Transcoding**. The **Hardwar
 Enable Single Sign-On (SSO) with your preferred OIDC provider (Authentik, Keycloak, etc.) by configuring these variables in your `.env` file or Docker environment:
 
 ```env
-OIDC_ISSUER_URL=https://your-idp.com/application/o/nodecast/
+OIDC_ISSUER_URL=https://your-idp.com/application/o/astrem/
 OIDC_CLIENT_ID=your_client_id
 OIDC_CLIENT_SECRET=your_client_secret
 OIDC_CALLBACK_URL=http://localhost:3000/api/auth/oidc/callback # Adjust for your domain
@@ -146,7 +147,7 @@ OIDC_CALLBACK_URL=http://localhost:3000/api/auth/oidc/callback # Adjust for your
 
 ## Browser Codec Support & Transcoding
 
-nodecast-tv is a web-based application. By default, **video decoding is handled by your browser**. However, the built-in **smart transcoding system** automatically converts incompatible media (e.g., HEVC video, Dolby audio) into browser-friendly formats using FFmpeg.
+astrem is a web-based application. By default, **video decoding is handled by your browser**. However, the built-in **smart transcoding system** automatically converts incompatible media (e.g., HEVC video, Dolby audio) into browser-friendly formats using FFmpeg.
 
 **Codec Compatibility Table:**
 
@@ -163,7 +164,7 @@ nodecast-tv is a web-based application. By default, **video decoding is handled 
 
 ## Supported Stream Types
 
-nodecast-tv is optimized for **HLS (HTTP Live Streaming)**.
+astrem is optimized for **HLS (HTTP Live Streaming)**.
 
 - **✅ HLS (`.m3u8`)**: Fully supported and recommended. Best for adaptive bitrate and network resilience.
 - **✅ MPEG-TS (`.ts`)**: Supported via Force Remux in settings.
@@ -234,7 +235,7 @@ All transcoding and stream processing settings are found in **Settings → Trans
 
 ### HTTPS / Reverse Proxy Issues
 
-If you're running nodecast-tv behind a reverse proxy (Nginx, Caddy, Traefik) with HTTPS:
+If you're running astrem behind a reverse proxy (Nginx, Caddy, Traefik) with HTTPS:
 
 | Symptom                            | Likely Cause                                    | Solution                                                      |
 | ---------------------------------- | ----------------------------------------------- | ------------------------------------------------------------- |
@@ -245,7 +246,7 @@ If you're running nodecast-tv behind a reverse proxy (Nginx, Caddy, Traefik) wit
 
 ```
 tv.domain.com {
-    reverse_proxy nodecast:3000 {
+    reverse_proxy astrem:3000 {
         flush_interval -1
         header_up X-Forwarded-Proto {scheme}
     }
@@ -256,7 +257,7 @@ tv.domain.com {
 
 ```nginx
 location / {
-    proxy_pass http://nodecast:3000;
+    proxy_pass http://astrem:3000;
     proxy_http_version 1.1;           # Required for chunked transfers and keep-alive
     proxy_buffering off;              # Don't buffer responses (required for streaming)
     proxy_request_buffering off;      # Don't buffer requests
@@ -277,25 +278,25 @@ If you manage your streams with middleware tools, you may encounter CORS issues 
 
 **Recommended Setup:**
 
-1.  **Force Backend Proxy:** Enable this in **Settings → Transcoding → Network**. This routes middleware streams through NodeCast TV, bypassing CORS restrictions.
+1.  **Force Backend Proxy:** Enable this in **Settings → Transcoding → Network**. This routes middleware streams through astrem, bypassing CORS restrictions.
 2.  **Auto Transcode:** Keep this enabled (default). It will automatically detect if the middleware stream (e.g., MPEG-TS) needs to be remuxed or transcoded for the browser.
 
 There is rarely a need to configure specific "Force Remux" settings manually anymore; the system detects stream types automatically.
 
 ### TVHeadend
 
-If you're using TVHeadend as your source, you may need to configure a few settings for streams to play correctly in nodecast-tv:
+If you're using TVHeadend as your source, you may need to configure a few settings for streams to play correctly in astrem:
 
 **Option 1: Enable Force Backend Proxy (Easiest)**
 
-- In nodecast-tv, go to **Settings → Transcoding → Network**
+- In astrem, go to **Settings → Transcoding → Network**
 - Enable **"Force Backend Proxy"**
 - This routes streams through the server, bypassing browser CORS restrictions
 
 **Option 2: Configure TVHeadend CORS**
 
 - In TVHeadend, go to **Configuration → General → Base → HTTP Server Settings**
-- Add your nodecast-tv URL to **"CORS origin"** (e.g., `http://192.168.1.100:3000`)
+- Add your astrem URL to **"CORS origin"** (e.g., `http://192.168.1.100:3000`)
 - **Note:** You must include the protocol (`http://` or `https://`)
 
 **Additional Tips:**
@@ -305,7 +306,7 @@ If you're using TVHeadend as your source, you may need to configure a few settin
 
 ### Acestream / P2P Streaming
 
-If you are using `acestream-docker-home` or similar tools, it is **recommended** to use the HLS output format to reduce server load, though NodeCast TV can remux raw streams if needed.
+If you are using `acestream-docker-home` or similar tools, it is **recommended** to use the HLS output format to reduce server load, though astrem can remux raw streams if needed.
 
 - **Recommended:** `http://proxy:6878/ace/manifest.m3u8?id=...` (HLS Playlist - Direct Play)
 - **Supported:** `http://proxy:6878/ace/getstream?id=...` (MPEG-TS - Requires Server Remuxing)
@@ -321,7 +322,7 @@ If you are using `acestream-docker-home` or similar tools, it is **recommended**
 ## Project Structure
 
 ```
-nodecast-tv/
+astrem/
 ├── public/              # Frontend assets
 │   ├── css/             # Stylesheets
 │   ├── js/              # Client-side logic
